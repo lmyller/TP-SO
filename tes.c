@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include "tes.h"
 
 int main(){
@@ -24,6 +25,7 @@ void tes(){
    char entrada[TAMANHO_NOME_ARQUIVO * 4];
    char **nomesArquivos = alocarMemoria(NUMERO_MAXIMO_DE_PROGRAMAS, TAMANHO_NOME_ARQUIVO);
    Programa programas[NUMERO_MAXIMO_DE_PROGRAMAS];
+   MaquinaExecucao maquinaExecucao;
    int numeroDeProgramas, numeroDeProcessos, quantidadeProgramas = NUMERO_MAXIMO_DE_PROGRAMAS;
    pid_t tes1, tes2;
 
@@ -46,14 +48,14 @@ void tes(){
       else
          numeroDeProcessos = 1;
 
-      
+      maquinaExecucao = criarMaquinaExecucao(programas, numeroDeProgramas);
 
       for(int indice = 0; indice < numeroDeProcessos; indice++){
          if(criarProcesso() != 0)
             wait(NULL);
 
          else
-            lpas
+            lpas;
       }
 
       lpas(programas, quantidadeProgramas);
@@ -160,7 +162,7 @@ void lpas(Programa *programas, int quantidadeProgramas){
    for(int indice = 0; indice < quantidadeProgramas; indice++){
       programa = programas[indice];
       
-      for(int indiceInstrucao = 0; indiceInstrucao < programa.numeroDeInstrucoes; indiceInstrucao++){
+      /*for(int indiceInstrucao = 0; indiceInstrucao < programa.numeroDeInstrucoes; indiceInstrucao++){
          if(strncmp(programa.instrucoes[indiceInstrucao], READ, strlen(READ)) == 0){
             instrucaoRead();
          }
@@ -196,12 +198,52 @@ void lpas(Programa *programas, int quantidadeProgramas){
          if(strncmp(programa.instrucoes[indiceInstrucao], HALT, strlen(HALT)) == 0){
             instrucaoRead();
          }
-      }
+      }*/
    }
 }
 
 pid_t criarProcesso(){
    return fork();
+}
+
+MaquinaExecucao criarMaquinaExecucao(Programa *programa, int quantidadeProgramas){
+   MaquinaExecucao maquinaExecucao;
+   
+   for(int indice = 0; indice < quantidadeProgramas; indice++){
+      Tarefa tarefa = criarTarefa(indice, programa[indice]);
+      
+      DescritorTarefa descritorTarefa = criarDescritorTarefa(tarefa);
+
+      maquinaExecucao.tarefas[indice] = descritorTarefa;      
+   }
+   
+   maquinaExecucao.registrador = 0;
+   maquinaExecucao.numeroDeProgramas = quantidadeProgramas;
+
+   return maquinaExecucao;
+}
+
+Tarefa criarTarefa(int identificador, Programa programa){
+   Tarefa tarefa;
+   
+   tarefa.identificador = identificador;
+   tarefa.programa = programa;
+
+   return tarefa;
+}
+
+DescritorTarefa criarDescritorTarefa(Tarefa tarefa){
+   DescritorTarefa descritorTarefa;
+
+   descritorTarefa.estado = NOVA;
+   descritorTarefa.pc = 0;
+   descritorTarefa.tarefa = tarefa;
+   descritorTarefa.tempoCPU = 0;
+   descritorTarefa.tempoES = 0;
+
+   printf("\n%d %d %d", descritorTarefa.tempoCPU, descritorTarefa.tempoES, descritorTarefa.pc);
+
+   return descritorTarefa;
 }
 
 /**

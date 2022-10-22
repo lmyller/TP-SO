@@ -1,3 +1,4 @@
+
 #pragma once
 
 // Tamanho máximo do nome de arquivo.
@@ -148,5 +149,9 @@ void exibirPrompt();
 void verificarNomesArquivos(char *entrada, char *nomesArquivos[]);
 char** alocarMemoria(const int linhas, const int colunas);
 void retiraBarraN(char *palavra);
-void lerArquivos(Programa *programas, char *nomesArquivos[], int quantidadeProgramas);
+int lerArquivos(Programa *programas, char *nomesArquivos[], int quantidadeMaximaProgramas);
 void lpas(Programa *programas, int quantidadeProgramas);
+pid_t criarProcesso();
+MaquinaExecucao criarMaquinaExecucao(Programa *programa, int quantidadeProgramas);
+Tarefa criarTarefa(int identificador, Programa programa);
+DescritorTarefa criarDescritorTarefa(Tarefa tarefa);
